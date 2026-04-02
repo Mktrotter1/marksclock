@@ -22,7 +22,7 @@ class TuyaProtocol(LampProtocol):
             return []
 
         lamps: list[Lamp] = []
-        devices = tinytuya.deviceScan(maxretry=1, timeout=int(timeout))
+        devices = tinytuya.deviceScan(maxretry=1, verbose=False)
 
         for dev_id, info in devices.items():
             if not isinstance(info, dict):

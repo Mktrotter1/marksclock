@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import socket
 from typing import TYPE_CHECKING
 
 from markslamp.models import Lamp
@@ -14,6 +15,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _get_local_ips() -> set[str]:
+    """Get all local IP addresses to filter self-discovery."""
+    ips = {"127.0.0.1", "::1"}
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None):
+            ips.add(info[4][0])
+    except Exception:
+        pass
+    # Also try the UDP trick for default route IP
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ips.add(s.getsockname()[0])
+        s.close()
+    except Exception:
+        pass
+    return ips
+
+
 class Scanner:
     """Discovers lamps by running all protocol adapters concurrently."""
 
@@ -21,10 +41,12 @@ class Scanner:
         self.protocols = protocols
         self.timeout = timeout
         self.lamps: dict[str, Lamp] = {}
+        self._local_ips = _get_local_ips()
 
     async def scan(self) -> dict[str, Lamp]:
         """Run discovery across all protocols concurrently."""
         logger.info("Starting scan with %d protocols (timeout=%.1fs)", len(self.protocols), self.timeout)
+        logger.debug("Local IPs (will be filtered): %s", self._local_ips)
 
         tasks = [self._run_protocol(proto) for proto in self.protocols]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -34,6 +56,9 @@ class Scanner:
                 logger.warning("Protocol %s discovery failed: %s", proto.name, result)
             elif isinstance(result, list):
                 for lamp in result:
+                    if lamp.ip in self._local_ips:
+                        logger.debug("Filtered self-discovery: %s at %s (%s)", lamp.name, lamp.ip, proto.name)
+                        continue
                     key = lamp.id or f"{lamp.protocol}:{lamp.ip}:{lamp.port}"
                     if key not in self.lamps:
                         self.lamps[key] = lamp

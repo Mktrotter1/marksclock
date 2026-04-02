@@ -12,6 +12,7 @@ class SwitchType(enum.Enum):
     RANGE = "range"         # slider (brightness, color_temp)
     COLOR = "color"         # RGB/HSV picker
     SELECT = "select"       # dropdown (effects, modes)
+    BUTTON = "button"       # momentary press (RF bridge, cycle lamp)
 
 
 @dataclass
@@ -36,6 +37,8 @@ class Switch:
             return f"({self.value})"
         if self.switch_type == SwitchType.SELECT:
             return f"{self.value}"
+        if self.switch_type == SwitchType.BUTTON:
+            return "PRESS"
         return str(self.value)
 
 

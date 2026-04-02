@@ -58,7 +58,7 @@ class FailingProtocol(LampProtocol):
         return {}
 
 
-def _make_lamp(ip: str = "192.168.1.100", name: str = "Test Lamp") -> Lamp:
+def _make_lamp(ip: str = "203.0.113.100", name: str = "Test Lamp") -> Lamp:
     return Lamp(id=f"fake:{ip}", name=name, ip=ip, port=80, protocol="fake")
 
 
@@ -70,13 +70,13 @@ async def test_scan_finds_lamps():
 
     found = await scanner.scan()
     assert len(found) == 1
-    assert "fake:192.168.1.100" in found
+    assert "fake:203.0.113.100" in found
 
 
 @pytest.mark.asyncio
 async def test_scan_deduplicates():
-    lamp1 = _make_lamp("10.0.0.1", "Lamp A")
-    lamp2 = _make_lamp("10.0.0.1", "Lamp A duplicate")
+    lamp1 = _make_lamp("203.0.113.1", "Lamp A")
+    lamp2 = _make_lamp("203.0.113.1", "Lamp A duplicate")
     lamp2.id = lamp1.id  # same ID
 
     proto = FakeProtocol(lamps=[lamp1, lamp2])
@@ -87,9 +87,9 @@ async def test_scan_deduplicates():
 
 @pytest.mark.asyncio
 async def test_scan_multiple_protocols():
-    lamp1 = _make_lamp("10.0.0.1", "Lamp 1")
-    lamp2 = _make_lamp("10.0.0.2", "Lamp 2")
-    lamp2.id = "fake:10.0.0.2"
+    lamp1 = _make_lamp("203.0.113.1", "Lamp 1")
+    lamp2 = _make_lamp("203.0.113.2", "Lamp 2")
+    lamp2.id = "fake:203.0.113.2"
 
     proto1 = FakeProtocol(lamps=[lamp1])
     proto2 = FakeProtocol(lamps=[lamp2])

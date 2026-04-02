@@ -172,6 +172,24 @@
     cursor: pointer;
   }
 
+  /* Button (momentary press) */
+  .btn-press {
+    background: var(--accent);
+    color: var(--text);
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+  }
+  .btn-press:active {
+    background: var(--glow);
+    transform: scale(0.93);
+  }
+
   /* Color picker */
   input[type=color] {
     -webkit-appearance: none;
@@ -316,6 +334,8 @@ function switchRow(lampId, name, sw) {
       `<option value="${esc(o)}" ${String(sw.value)===String(o)?'selected':''}>${esc(o)}</option>`
     ).join('');
     control = `<select onchange="setSwitch('${esc(lampId)}','${esc(name)}',this.value)">${opts}</select>`;
+  } else if (sw.type === 'button') {
+    control = `<button class="btn-press" onclick="setSwitch('${esc(lampId)}','${esc(name)}',true)">Press</button>`;
   } else {
     control = `<span>${esc(String(sw.value))}</span>`;
   }

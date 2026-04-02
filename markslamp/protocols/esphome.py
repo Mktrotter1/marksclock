@@ -27,10 +27,10 @@ class ESPHomeProtocol(LampProtocol):
         found: dict[str, dict[str, Any]] = {}
 
         def on_service(
-            zc: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
+            *, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
         ) -> None:
             if state_change == ServiceStateChange.Added:
-                info = zc.get_service_info(service_type, name)
+                info = zeroconf.get_service_info(service_type, name)
                 if info and info.parsed_addresses():
                     props = {
                         k.decode(): v.decode() if isinstance(v, bytes) else v
@@ -68,7 +68,7 @@ class ESPHomeProtocol(LampProtocol):
 
     async def connect(self, lamp: Lamp) -> bool:
         try:
-            from aioesphomeapi import APIClient, LightInfo, LightState
+            from aioesphomeapi import APIClient, LightInfo, ButtonInfo
         except ImportError:
             logger.debug("aioesphomeapi not installed")
             return False
@@ -79,12 +79,15 @@ class ESPHomeProtocol(LampProtocol):
 
             entities, services = await client.list_entities_services()
             light_entities = [e for e in entities if isinstance(e, LightInfo)]
+            button_entities = [e for e in entities if isinstance(e, ButtonInfo)]
 
-            if not light_entities:
-                logger.info("ESPHome device %s has no light entities", lamp.ip)
+            has_controllables = bool(light_entities or button_entities)
+            if not has_controllables:
+                logger.info("ESPHome device %s has no light or button entities", lamp.ip)
                 await client.disconnect()
                 return False
 
+            # Register light entities as switches
             for light in light_entities:
                 prefix = f"{light.name}:" if len(light_entities) > 1 else ""
                 lamp.add_switch(Switch(f"{prefix}power", SwitchType.TOGGLE, value=False))
@@ -102,8 +105,13 @@ class ESPHomeProtocol(LampProtocol):
                                            value=light.effects[0] if light.effects else "",
                                            options=list(light.effects)))
 
+            # Register button entities (for RF bridge, cycle lamps, etc.)
+            for btn in button_entities:
+                lamp.add_switch(Switch(f"btn:{btn.name}", SwitchType.BUTTON, value=False))
+
             self._clients[lamp.id] = client
             lamp.raw_info["_light_entities"] = light_entities
+            lamp.raw_info["_button_entities"] = {f"btn:{b.name}": b for b in button_entities}
             lamp.connected = True
             return True
         except Exception as e:
@@ -115,11 +123,24 @@ class ESPHomeProtocol(LampProtocol):
         if not client:
             return False
 
+        # Handle button presses (RF bridge, etc.)
+        button_map = lamp.raw_info.get("_button_entities", {})
+        if switch_name in button_map:
+            try:
+                btn = button_map[switch_name]
+                await client.button_command(btn.key)
+                # Buttons are momentary - flash to True then back to False
+                if switch_name in lamp.switches:
+                    lamp.switches[switch_name].value = True
+                return True
+            except Exception as e:
+                logger.error("ESPHome button press failed: %s", e)
+                return False
+
         light_entities = lamp.raw_info.get("_light_entities", [])
         if not light_entities:
             return False
 
-        # Find the right light entity (first one, or match prefix)
         light = light_entities[0]
         key = light.key
 

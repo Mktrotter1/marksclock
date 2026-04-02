@@ -36,10 +36,10 @@ class HueProtocol(LampProtocol):
         found_ip: list[str] = []
 
         def on_service(
-            zc: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
+            *, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
         ) -> None:
             if state_change == ServiceStateChange.Added:
-                info = zc.get_service_info(service_type, name)
+                info = zeroconf.get_service_info(service_type, name)
                 if info and info.parsed_addresses() and "hue" in name.lower():
                     found_ip.append(info.parsed_addresses()[0])
 

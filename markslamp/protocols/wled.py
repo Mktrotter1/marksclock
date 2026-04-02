@@ -36,10 +36,10 @@ class WLEDProtocol(LampProtocol):
         event = asyncio.Event()
 
         def on_service_state_change(
-            zc: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
+            *, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
         ) -> None:
             if state_change == ServiceStateChange.Added:
-                info = zc.get_service_info(service_type, name)
+                info = zeroconf.get_service_info(service_type, name)
                 if info and info.parsed_addresses():
                     ip = info.parsed_addresses()[0]
                     found[name] = {

@@ -31,10 +31,10 @@ class ShellyProtocol(LampProtocol):
         found: dict[str, dict[str, Any]] = {}
 
         def on_service(
-            zc: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
+            *, zeroconf: Zeroconf, service_type: str, name: str, state_change: ServiceStateChange
         ) -> None:
             if state_change == ServiceStateChange.Added:
-                info = zc.get_service_info(service_type, name)
+                info = zeroconf.get_service_info(service_type, name)
                 if info and info.parsed_addresses() and "shelly" in name.lower():
                     found[name] = {
                         "ip": info.parsed_addresses()[0],
