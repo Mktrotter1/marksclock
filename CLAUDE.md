@@ -1,34 +1,47 @@
-# markslamp
+# marksclock
 
-Smart lamp scanner, discoverer, and controller. Finds lamps on the local network across 11 protocols and spawns switches for their controllable variables.
+Exhaustive time utility suite — clock, timers, stopwatch, world clock, converters, and more. Python + FastAPI backend with vanilla JS web UI.
 
 ## Quick Start
 
 ```bash
 pip install -e .
-markslamp scan              # discover lamps
-markslamp control           # interactive control
-markslamp list-protocols    # show supported protocols
-markslamp snapshot          # save state to JSON
+marksclock serve              # start on 0.0.0.0:8080
+marksclock serve --port 9090  # custom port
+marksclock info               # show config
 ```
+
+Then open `http://localhost:8080` (or LAN IP from phone).
 
 ## Architecture
 
-- `markslamp/models.py` - Lamp, Switch, SwitchType data models
-- `markslamp/scanner.py` - Concurrent multi-protocol discovery engine
-- `markslamp/switch_manager.py` - Switch lifecycle, state tracking, event history
-- `markslamp/protocols/` - One adapter per protocol (11 total)
-- `markslamp/__main__.py` - CLI (click + rich)
+- `marksclock/app.py` — FastAPI factory, router mounting, WebSocket, static files
+- `marksclock/__main__.py` — CLI (click): serve, info
+- `marksclock/config.py` — Settings from env vars
+- `marksclock/state.py` — In-memory state + JSON persistence (~/.config/marksclock/)
+- `marksclock/routers/` — One router per feature (11 total)
+- `marksclock/services/` — Business logic (timezone, sun, date calc, etc.)
+- `marksclock/static/` — CSS + JS (vanilla, ES modules, no build step)
+- `marksclock/templates/index.html` — Single HTML shell (Jinja2)
 
-## Protocols
+## Features (21 modules)
 
-WLED, Tuya, LIFX, Yeelight, Magic Home, Tasmota, ESPHome, Philips Hue, Shelly, Govee, Elgato Key Light.
+Clock, Timer, Stopwatch, Alarms, Pomodoro, World Clock, Calendar, Timezone Converter, Time Difference, Duration Calculator, Age Calculator, Days Between, Day of Week, Week Number, Leap Year, Unix Timestamp, ISO 8601, Sunrise/Sunset, DST Reference, Timezone Reference, Meeting Planner.
 
-Discovery uses mDNS (zeroconf), SSDP, and UDP broadcasts depending on protocol.
+## Environment Variables
+
+| Var | Default | Description |
+|-----|---------|-------------|
+| `MARKSCLOCK_HOST` | `0.0.0.0` | Bind host |
+| `MARKSCLOCK_PORT` | `8080` | Bind port |
+| `MARKSCLOCK_TZ` | `America/New_York` | Default timezone |
+| `MARKSCLOCK_LAT` | — | Home latitude (for sunrise/sunset) |
+| `MARKSCLOCK_LON` | — | Home longitude |
+| `MARKSCLOCK_STATE_DIR` | `~/.config/marksclock` | State persistence directory |
 
 ## Gotchas
 
-- **Tuya** requires a one-time cloud lookup for local keys (set in `.env`)
-- **Hue** requires pressing the bridge link button on first use
-- **ESPHome** default password is empty string
-- Firewall must allow mDNS (5353/udp), SSDP (1900/udp), and protocol-specific ports
+- Sunrise/sunset requires lat/lon coordinates (set in `.env` or use browser geolocation)
+- Alarm sounds require user to click "Enable Audio" (browser autoplay policy)
+- State persists to `~/.config/marksclock/state.json` — delete to reset
+- Timezone data comes from system tzdata (via Python `zoneinfo`)

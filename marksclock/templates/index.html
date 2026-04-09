@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>marksclock</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/clock.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar (desktop) -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>marksclock</h1>
+      </div>
+      <ul class="nav-list">
+        <li><a href="#clock" class="nav-item active" data-page="clock">
+          <span class="nav-icon">&#128339;</span><span class="nav-label">Clock</span>
+        </a></li>
+        <li><a href="#timers" class="nav-item" data-page="timers">
+          <span class="nav-icon">&#9201;</span><span class="nav-label">Timers</span>
+        </a></li>
+        <li><a href="#stopwatch" class="nav-item" data-page="stopwatch">
+          <span class="nav-icon">&#9202;</span><span class="nav-label">Stopwatch</span>
+        </a></li>
+        <li><a href="#alarms" class="nav-item" data-page="alarms">
+          <span class="nav-icon">&#9200;</span><span class="nav-label">Alarms</span>
+        </a></li>
+        <li><a href="#worldclock" class="nav-item" data-page="worldclock">
+          <span class="nav-icon">&#127758;</span><span class="nav-label">World Clock</span>
+        </a></li>
+        <li><a href="#pomodoro" class="nav-item" data-page="pomodoro">
+          <span class="nav-icon">&#127813;</span><span class="nav-label">Pomodoro</span>
+        </a></li>
+        <li><a href="#calendar" class="nav-item" data-page="calendar">
+          <span class="nav-icon">&#128197;</span><span class="nav-label">Calendar</span>
+        </a></li>
+        <li class="nav-divider"></li>
+        <li><a href="#converters" class="nav-item" data-page="converters">
+          <span class="nav-icon">&#128260;</span><span class="nav-label">Converters</span>
+        </a></li>
+        <li><a href="#sun" class="nav-item" data-page="sun">
+          <span class="nav-icon">&#9728;</span><span class="nav-label">Sun</span>
+        </a></li>
+        <li><a href="#reference" class="nav-item" data-page="reference">
+          <span class="nav-icon">&#128218;</span><span class="nav-label">Timezones</span>
+        </a></li>
+        <li><a href="#meeting" class="nav-item" data-page="meeting">
+          <span class="nav-icon">&#129309;</span><span class="nav-label">Meeting</span>
+        </a></li>
+      </ul>
+    </nav>
+
+    <!-- Bottom tab bar (mobile) -->
+    <nav class="bottom-nav" id="bottomNav">
+      <a href="#clock" class="tab active" data-page="clock">
+        <span class="tab-icon">&#128339;</span><span class="tab-label">Clock</span>
+      </a>
+      <a href="#timers" class="tab" data-page="timers">
+        <span class="tab-icon">&#9201;</span><span class="tab-label">Timers</span>
+      </a>
+      <a href="#worldclock" class="tab" data-page="worldclock">
+        <span class="tab-icon">&#127758;</span><span class="tab-label">World</span>
+      </a>
+      <a href="#converters" class="tab" data-page="converters">
+        <span class="tab-icon">&#128260;</span><span class="tab-label">Tools</span>
+      </a>
+      <a href="#more" class="tab" data-page="more" id="moreTab">
+        <span class="tab-icon">&#8943;</span><span class="tab-label">More</span>
+      </a>
+    </nav>
+
+    <!-- Main content -->
+    <main class="content" id="content">
+      <div id="page-container"></div>
+    </main>
+
+    <!-- More menu overlay (mobile) -->
+    <div class="more-menu" id="moreMenu">
+      <div class="more-menu-content">
+        <a href="#stopwatch" class="more-item" data-page="stopwatch">&#9202; Stopwatch</a>
+        <a href="#alarms" class="more-item" data-page="alarms">&#9200; Alarms</a>
+        <a href="#pomodoro" class="more-item" data-page="pomodoro">&#127813; Pomodoro</a>
+        <a href="#calendar" class="more-item" data-page="calendar">&#128197; Calendar</a>
+        <a href="#sun" class="more-item" data-page="sun">&#9728; Sun</a>
+        <a href="#reference" class="more-item" data-page="reference">&#128218; Timezones</a>
+        <a href="#meeting" class="more-item" data-page="meeting">&#129309; Meeting</a>
+      </div>
+    </div>
+
+    <!-- Audio enable banner -->
+    <div class="audio-banner" id="audioBanner">
+      <span>Click to enable sound notifications</span>
+      <button id="enableAudio">Enable</button>
+    </div>
+  </div>
+
+  <script type="module" src="/static/js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

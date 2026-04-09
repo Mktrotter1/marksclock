@@ -1,27 +1,16 @@
-[build-system]
-requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "markslamp"
+name = "marksclock"
 version = "0.1.0"
-description = "Scan, discover, and control smart lamps across multiple protocols"
+description = "Exhaustive time utility suite — clock, timers, world clock, converters, and more"
 requires-python = ">=3.11"
 dependencies = [
-    "zeroconf>=0.131.0",
-    "aiohttp>=3.9.0",
-    "tinytuya>=1.13.0",
-    "lifxlan>=1.2.7",
-    "yeelight>=0.7.14",
-    "flux-led>=1.0.4",
-    "aioesphomeapi>=18.0.0",
-    "phue>=1.1",
-    "aioshelly>=8.0.0",
-    "rich>=13.7.0",
-    "click>=8.1.0",
     "fastapi>=0.111.0",
     "uvicorn[standard]>=0.29.0",
     "jinja2>=3.1.0",
+    "astral>=3.2",
+    "python-dateutil>=2.9.0",
+    "click>=8.1.0",
+    "websockets>=12.0",
 ]
 
 [project.optional-dependencies]
@@ -32,11 +21,8 @@ test = [
 ]
 
 [project.scripts]
-markslamp = "markslamp.__main__:main"
+marksclock = "marksclock.__main__:main"
 
-[tool.ruff]
-target-version = "py311"
-line-length = 100
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
